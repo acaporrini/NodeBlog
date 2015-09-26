@@ -6,9 +6,11 @@ block content
       .post
         h1
           a(href='/posts/show/id/#{post._id}') #{post.title}
-        p.meta Posted in #{post.category} by #{post.author} on #{moment(post.date).format("MM-DD-YYYY")}
+        p.meta Posted in
+          a(href='/categories/show/#{post.category}')  #{post.category}
+          span  by #{post.author} on #{moment(post.date).format("MM-DD-YYYY")}
         img(src='/images/Uploads/#{post.mainimage}')
-        !=post.body
+        !=truncateText(post.body, 400)
         a.more(href='/posts/show/id/#{post._id}') Read More
   else
     p.noposts There are no posts to display

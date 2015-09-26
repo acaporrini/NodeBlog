@@ -16,6 +16,77 @@ router.get('/add',function(req,res,next){
   });
 
 });
+router.get('/show/id/:post', function(req,res, next){
+  var posts = db.get('posts');
+  posts.findOne({_id:req.params.post},{},function(err,post){
+    if (post){
+      console.log(post);
+      res.render('show',{
+        'post' : post
+      });
+    }
+
+  });
+
+});
+
+
+router.post('/addcomment',function(req,res,next){
+  //get  form values
+  var name = req.body.name;
+  var email = req.body.email;
+  var body = req.body.body;
+  var postid = req.body.postid;
+  var commentdate = new Date();
+
+
+
+  // Form Validatin
+  req.checkBody('name','This field is required').notEmpty();
+  req.checkBody('email','This field is required').notEmpty();
+  req.checkBody('email','Email is not formatted correctly').isEmail();
+  req.checkBody('body', 'Body field is required').notEmpty();
+
+  var errors = req.validationErrors();
+
+  if(errors){
+    var post = db.get('posts');
+    posts.findById(postid,function(err,post){
+      res.render('show',{
+        "errors": errors,
+        "post": post,
+      });
+    });
+
+  } else {
+    var comment = {"name":name, "email": email, "body":body, "commentdate":commentdate};
+
+    var posts = db.get('posts');
+    posts.update({
+      "_id" : postid
+    },
+    {
+      $push:{
+        "comments":comment
+      }
+    },
+      function(err, doc){
+        if(err) {
+          throw err;
+        }
+        else {
+          req.flash('success','Comment Added');
+          res.location('/posts/show/id/'+postid);
+          res.redirect('/posts/show/id/'+postid);
+        }
+      }
+    );
+
+
+  }
+});
+
+
 
 router.post('/add',upload.single('mainimage'),function(req,res,next){
   //get  form values

@@ -10,10 +10,18 @@ html
         ul
           li
             a(href='/') Home
-          li
-            a(href='/posts/add') Add Post
-          li
-            a(href='/categories/add') Add Category
+          if user
+            li
+              a(href='/posts/add') Add Post
+            li
+              a(href='/categories/add') Add Category
+            li
+              a(href='/users/logout') Logout
+          if !user
+            li(class=(title == 'Register' ? 'active' : ''))
+              a(href='/users/register') Register
+            li(class=(title == 'Login' ? 'active' : ''))
+              a(href='/users/login') Log In
       != messages()
       block content
       footer

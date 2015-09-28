@@ -8,7 +8,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongo = require('mongodb');
 var db = require('monk')('localhost/nodeblog');
-
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 var flash = require('connect-flash');
 var routes = require('./routes/index');
 var posts = require('./routes/posts');
@@ -44,6 +45,10 @@ app.use(session({
     resave: true
 }));
 
+//Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Express Validator
 app.use(expressValidator({
   errorFormatter: function(param, msg, value) {
@@ -72,7 +77,10 @@ app.use(function (req, res, next) {
   res.locals.messages = require('express-messages')(req, res);
   next();
 });
-
+app.get('*',function(req,res,next){
+  res.locals.user = req.user || null;
+  next();
+});
 
 // Make our db accessible to our router
 app.use(function(req,res,next){
@@ -81,7 +89,7 @@ app.use(function(req,res,next){
 });
 
 app.use('/', routes);
-//app.use('/users', users);
+app.use('/users', users);
 app.use('/posts', posts);
 app.use('/categories', categories);
 // catch 404 and forward to error handler

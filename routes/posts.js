@@ -6,7 +6,7 @@ var db = require('monk')('localhost:27017/nodeblog');
 var multer = require('multer');
 var upload = multer({dest:'./public/images/Uploads'});
 
-router.get('/add',function(req,res,next){
+router.get('/add',ensureAuthenticated,function(req,res,next){
   var categories = db.get('categories');
   categories.find({},function(err,categories){
     res.render('addpost',{
@@ -88,12 +88,12 @@ router.post('/addcomment',function(req,res,next){
 
 
 
-router.post('/add',upload.single('mainimage'),function(req,res,next){
+router.post('/add',ensureAuthenticated,upload.single('mainimage'),function(req,res,next){
   //get  form values
   var title = req.body.title;
   var category = req.body.category;
   var body = req.body.body;
-  var author = req.body.author;
+  var author = req.user.name;
   var date = new Date();
 
   if(req.file){
@@ -147,5 +147,11 @@ router.post('/add',upload.single('mainimage'),function(req,res,next){
   }
 });
 
+function ensureAuthenticated(req,res,next){
 
+  if(!req.isAuthenticated()){
+    res.redirect('/users/login');
+  }
+  next();
+};
 module.exports = router;
